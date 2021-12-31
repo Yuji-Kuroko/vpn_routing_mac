@@ -1,0 +1,21 @@
+#!/bin/sh
+#
+# @see http://www.ytsuboi.org/wp/archives/2178
+#
+# $1 interface-name
+# $2 tty-device
+# $3 speed
+# $4 local-IP-address
+# $5 remote-IP-address
+# $6 ipparam
+
+cd $(dirname $(realpath $0))/..
+
+exe/vpn-routing ip-up\
+  --interface-name="$1"\
+  --tty-device="$2"\
+  --speed="$3"\
+  --local-ip="$4"\
+  --remote-ip="$5"\
+  --ipparam="$6" >/tmp/ppp.log 2>&1\
+  --verbose

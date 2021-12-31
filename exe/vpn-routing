@@ -1,0 +1,116 @@
+#!/usr/bin/env ruby
+
+require_relative "../lib/vpn_routing_mac/application"
+VpnRoutingMac::Application.setup
+require "thor"
+
+class VpnRoutingCLI < Thor
+  class RequireSudoError < StandardError; end
+  class DoNotRequireSudoError < StandardError; end
+
+  desc "ip-up", "called by ip-up"
+  option :interface_name, required: true
+  option :remote_ip, required: true
+  option :tty_device
+  option :speed
+  option :local_ip
+  option :ipparam
+  option :verbose, type: :boolean, default: false
+  def ip_up
+    require_sudo!
+    dup_options = options.dup
+    CommandExecutor.instance.verbose = dup_options.delete("verbose")
+    VpnRoutingMac::Application.cmd_ip_up(**dup_options.transform_keys(&:to_sym))
+  end
+
+  desc "reload", "reload configs"
+  option :verbose, type: :boolean, default: false
+  def reload
+    require_sudo!
+    dup_options = options.dup
+    CommandExecutor.instance.verbose = dup_options.delete("verbose")
+    VpnRoutingMac::Application.cmd_reload
+  end
+
+  desc "add_domain", "add domain of routing"
+  option :permanent, type: :boolean, default: false
+  option :comment, type: :string, default: ""
+  option :dir, type: :string, default: nil
+  option :verbose, type: :boolean, default: false
+  def add_domain(domain)
+    require_sudo!
+    dup_options = options.dup
+    CommandExecutor.instance.verbose = dup_options.delete("verbose")
+    VpnRoutingMac::Application.cmd_add_domain(domain, **dup_options.transform_keys(&:to_sym))
+  end
+
+  desc "delete_domain", "delete domain of routing (temporary)"
+  option :dir, type: :string, default: nil
+  option :verbose, type: :boolean, default: false
+  def delete_domain(domain)
+    require_sudo!
+    dup_options = options.dup
+    CommandExecutor.instance.verbose = dup_options.delete("verbose")
+    VpnRoutingMac::Application.cmd_delete_domain(domain, **dup_options.transform_keys(&:to_sym))
+  end
+
+  desc "add_ip", "add ip of routing"
+  option :permanent, type: :boolean, default: false
+  option :comment, type: :string, default: ""
+  option :dir, type: :string, default: nil
+  option :verbose, type: :boolean, default: false
+  def add_ip(ip)
+    require_sudo!
+    dup_options = options.dup
+    CommandExecutor.instance.verbose = dup_options.delete("verbose")
+    VpnRoutingMac::Application.cmd_add_ip(ip, **dup_options.transform_keys(&:to_sym))
+  end
+
+  desc "delete_ip", "delete ip of routing (temporary)"
+  option :dir, type: :string, default: nil
+  option :verbose, type: :boolean, default: false
+  def delete_ip(domain)
+    require_sudo!
+    dup_options = options.dup
+    CommandExecutor.instance.verbose = dup_options.delete("verbose")
+    VpnRoutingMac::Application.cmd_delete_ip(domain, **dup_options.transform_keys(&:to_sym))
+  end
+
+  desc "edit", "open config directory in Finder"
+  def edit
+    do_not_require_sudo!
+    `open -a "Finder" "#{VpnRoutingMac::Config.config_dir}"`
+  end
+
+  desc "install", "setup /etc/ppp/ip-up"
+  def install
+    require_sudo!
+    VpnRoutingMac::Application.cmd_install
+  end
+
+  desc "uninstall", "delete /etc/ppp/ip-up"
+  def uninstall
+    require_sudo!
+    VpnRoutingMac::Application.cmd_uninstall
+  end
+
+  desc "create_config", "create new vpn config"
+  option :dir, type: :string, required: true
+  option :gateway_ip, type: :string, required: true
+  def create_config
+    do_not_require_sudo!
+    VpnRoutingMac::Application.cmd_create_config(**options.transform_keys(&:to_sym))
+  end
+
+  no_tasks do
+    def require_sudo!
+      raise RequireSudoError.new("Error: require sudo") if `/usr/bin/whoami`.strip != "root"
+    end
+
+    def do_not_require_sudo!
+      raise DoNotRequireSudoError.new("Error: Do not require sudo") if `/usr/bin/whoami`.strip == "root"
+    end
+  end
+end
+
+VpnRoutingCLI.start(ARGV)
