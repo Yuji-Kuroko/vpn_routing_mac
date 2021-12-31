@@ -10,6 +10,7 @@ Gem::Specification.new do |spec|
   spec.description   = %q{Mac VPN routing setting tool.}
   spec.homepage      = "https://github.com/Yuji-Kuroko/vpn_routing_mac"
   spec.required_ruby_version = Gem::Requirement.new(">= 2.3.0")
+  spec.licenses    = ['MIT']
 
   spec.metadata["homepage_uri"] = spec.homepage
   spec.metadata["source_code_uri"] = "https://github.com/Yuji-Kuroko/vpn_routing_mac"
