@@ -5,7 +5,7 @@ module VpnRoutingMac
     class << self
       # load
       def setup
-        require "bundler/setup"
+        # require "bundler/setup"
         require "yaml"
         project_root.glob("lib/**/*.rb").each do |path|
           require path
