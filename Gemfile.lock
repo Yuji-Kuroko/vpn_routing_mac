@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    vpn_routing_mac (0.1.1)
+    vpn_routing_mac (0.1.2)
       thor (~> 1.1.0)
 
 GEM
