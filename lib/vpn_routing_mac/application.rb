@@ -25,8 +25,16 @@ module VpnRoutingMac
         active_interface_name = CommandExecutor.instance.execute!(cmd_active_interface_name, exception: false).strip
         raise DefaultGatewayNotFound if active_interface_name == ""
 
-        cmd = "/sbin/route change default -interface #{active_interface_name}"
-        CommandExecutor.instance.execute!(cmd)
+        # Big Sur以降ではコマンドが異なるので注意。
+        os_version = CommandExecutor.instance.execute!("sw_vers | grep ProductVersion | awk '{print $2}'").strip
+        if Gem::Version.create("12.5.0") > Gem::Version.create(os_version)
+          cmd = "/sbin/route change default -interface #{active_interface_name}"
+          CommandExecutor.instance.execute!(cmd)
+        else # Big Sur以降
+          gateway_ip = CommandExecutor.instance.execute!("/sbin/route -n get default | grep gateway | awk '{print $2}'").strip
+          CommandExecutor.instance.execute!("/sbin/route -n delete default")
+          CommandExecutor.instance.execute!("/sbin/route add default #{gateway_ip}")
+        end
       end
 
       def recent_vpn_log_path

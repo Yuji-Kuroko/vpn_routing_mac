@@ -3,7 +3,7 @@ module VpnRoutingMac
     # required: sudo
     def install
       if ip_up_path.exist?
-        backup_ip_up! if ip_up_path.exist?
+        backup_ip_up!
         ip_up_path.delete
       end
 
